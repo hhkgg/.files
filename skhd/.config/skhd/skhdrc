@@ -1,0 +1,57 @@
+# quickly restart the yabai launch agent
+ctrl + alt + cmd - r : launchctl kickstart -k "gui/${UID}/homebrew.mxcl.yabai"
+
+# open alacritty
+cmd - return : open -a Alacritty
+
+# #########################
+# windows
+# #########################
+alt - h : yabai -m window --focus west
+alt - j : yabai -m window --focus south
+alt - k : yabai -m window --focus north
+alt - l : yabai -m window --focus east
+
+# swap window
+alt + cmd - h : yabai -m window --swap west
+alt + cmd - j : yabai -m window --swap south
+alt + cmd - k : yabai -m window --swap north
+alt + cmd - l : yabai -m window --swap east
+
+# fullscreen
+alt - f : yabai -m window --toggle native-fullscreen
+# stack
+alt - s : yabai -m window --stack next
+alt - n : yabai -m window --focus stack.next || yabai -m window --focus stack.prev
+# floating window
+alt - t : yabai -m window --toggle float;\
+          yabai -m window --grid 20:20:1:1:18:18
+
+# #########################
+# desktop (macos spaces)
+# #########################
+cmd + alt - 1 : yabai -m space --focus 1
+cmd + alt - 2 : yabai -m space --focus 2
+cmd + alt - 3 : yabai -m space --focus 3
+cmd + alt - 4 : yabai -m space --focus 4
+cmd + alt - 5 : yabai -m space --focus 5
+cmd + alt - 6 : yabai -m space --focus 6
+
+#Move active window to next space on current display
+alt + shift - 1 : yabai -m query --spaces --space | jq -re ".index" | xargs -I {} bash -c "if [[ '{}' = '1' ]]; then yabai -m window --space 2; elif [[ '{}' = '2' ]]; then yabai -m window --space 1; fi"
+alt + shift - 2 : yabai -m query --spaces --space | jq -re ".index" | xargs -I {} bash -c "if [[ '{}' = '3' ]]; then yabai -m window --space 4; elif [[ '{}' = '4' ]]; then yabai -m window --space 3; fi"
+alt + shift - 3 : yabai -m query --spaces --space | jq -re ".index" | xargs -I {} bash -c "if [[ '{}' = '5' ]]; then yabai -m window --space 6; elif [[ '{}' = '6' ]]; then yabai -m window --space 5; fi"
+
+# send window to desktop and follow focus
+shift + cmd - x : yabai -m window --space last; yabai -m space --focus last
+shift + cmd - z : yabai -m window --space prev; yabai -m space --focus prev
+shift + cmd - c : yabai -m window --space next; yabai -m space --focus next
+shift + cmd - 1 : yabai -m window --space  1; yabai -m space --focus 1
+shift + cmd - 2 : yabai -m window --space  2; yabai -m space --focus 2
+shift + cmd - 3 : yabai -m window --space  3; yabai -m space --focus 3
+shift + cmd - 4 : yabai -m window --space  4; yabai -m space --focus 4
+shift + cmd - 5 : yabai -m window --space  5; yabai -m space --focus 5
+shift + cmd - 6 : yabai -m window --space  6; yabai -m space --focus 6
+
+# destroy desktop
+cmd + alt - w : yabai -m space --destroy
