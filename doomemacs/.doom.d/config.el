@@ -74,5 +74,13 @@
 ;;
 ;; You can also try 'gd' (or 'C-c c d') to jump to their definition and see how
 ;; they are implemented.
+;;
+;;
 
-(setq ns-auto-hide-menu-bar t)
+;;; LaTeX with AUCTeX
+(use-package auctex-skim                ; Skim as viewer for AUCTeX
+  :load-path "lisp/"
+  :commands (auctex-skim-select)
+  :after tex
+  :config (auctex-skim-select))
+

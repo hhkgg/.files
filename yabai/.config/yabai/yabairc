@@ -2,28 +2,18 @@
 yabai -m signal --add event=dock_did_restart action="sudo yabai --load-sa"
 sudo yabai --load-sa
 
-# bar settings
-# yabai -m config status_bar                   on
-# yabai -m config status_bar_text_font         "Fantasque Sans Mono:Bold:12.0"
-# yabai -m config status_bar_icon_font         "FontAwesome:Regular:12.0"
-# yabai -m config status_bar_background_color  0xe0202020
-# yabai -m config status_bar_foreground_color  0xffa8a8a8
-# yabai -m config status_bar_space_icon_strip          
-# yabai -m config status_bar_power_icon_strip   
-# yabai -m config status_bar_space_icon        
-# yabai -m config status_bar_clock_icon        
-
 # Unload the macOS WindowManager process
-launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist > /dev/null 2>&1 &
+# launchctl unload -F /System/Library/LaunchAgents/com.apple.WindowManager.plist > /dev/null 2>&1 &
 
+# for applications on spaces (sketchybar)
 yabai -m signal --add event=window_focused action="sketchybar --trigger window_focus"
 yabai -m signal --add event=window_created action="sketchybar --trigger windows_on_spaces"
 yabai -m signal --add event=window_destroyed action="sketchybar --trigger windows_on_spaces"
 
 # float settings
 yabai -m rule --add app="^System Preferences$" sticky=on layer=above manage=off
-# yabai -m rule --add app="^Karabiner-Elements$" sticky=on layer=above manage=off
-# yabai -m rule --add app="^Karabiner-EventViewer$" sticky=on layer=above manage=off
+yabai -m rule --add app="^Karabiner-Elements$" sticky=on layer=above manage=off
+yabai -m rule --add app="^Karabiner-EventViewer$" sticky=on layer=above manage=off
 yabai -m rule --add app="^Disk Utility$" sticky=on layer=above manage=off
 yabai -m rule --add app="^System Information$" sticky=on layer=above manage=off
 yabai -m rule --add app="^Activity Monitor$" sticky=on layer=above manage=off
