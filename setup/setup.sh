@@ -18,6 +18,8 @@ brew install koekeishiya/formulae/skhd
 brew install switchaudio-osx
 brew install cmake
 brew install sf-symbols
+# for prewview-latex
+brew install ghostscript
 # org roam dependency
 brew install git ripgrep
 

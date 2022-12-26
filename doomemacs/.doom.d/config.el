@@ -6,8 +6,8 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name "John Doe"
-      user-mail-address "john@doe.com")
+(setq user-full-name "hhkgg"
+      user-mail-address "kanghoward00@gmail.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
 ;;
@@ -21,8 +21,8 @@
 ;; See 'C-h v doom-font' for documentation and more examples of what they
 ;; accept. For example:
 ;;
-;;(setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
-;;      doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
+;; (setq doom-font (font-spec :family "Fira Code" :size 12 :weight 'semi-light)
+;;     doom-variable-pitch-font (font-spec :family "Fira Sans" :size 13))
 ;;
 ;; If you or Emacs can't find your font, use 'M-x describe-font' to look them
 ;; up, `M-x eval-region' to execute elisp code, and 'M-x doom/reload-font' to
@@ -76,11 +76,36 @@
 ;; they are implemented.
 ;;
 ;;
+;;
+;;
+;; Auctex configurations
+;; (setenv "PATH" (concat (getenv "PATH") ":/usr/local/bin:/Library/TeX/texbin"))
+;; (setq exec-path (append exec-path '("/usr/local/bin" "/Library/TeX/texbin")))
 
-;;; LaTeX with AUCTeX
-(use-package auctex-skim                ; Skim as viewer for AUCTeX
-  :load-path "lisp/"
-  :commands (auctex-skim-select)
-  :after tex
-  :config (auctex-skim-select))
+;; Auctex configurations
+;; (setenv "PATH" "/usr/local/bin:/Library/TeX/texbin/:$PATH" t)
+;; (setq exec-path (append exec-path '("/Library/TeX/texbin")))
 
+;; package configs
+(setq org-roam-directory (file-truename "~/org-roam"))
+
+
+
+;; mappings
+;; (map! :after python
+;;       :map python-mode-map
+;;       :prefix "C-x C-p"
+;;       "f" #'python-pytest-file
+;;       "r" #'python-pytest-repeat)
+
+;; yasnippet auto-expand
+;; (defun my-yas-try-expanding ()
+;;   (when yas-minor-mode (yas-expand)))
+;; (add-hook 'post-command-hook #'my-yas-try-expanding)
+
+;; prompt buffer (((after!  )
+(setq evil-vsplit-window-right t
+      evil-split-window-below t)
+(defadvice! prompt-for-buffer (&rest _)
+  :after '(evil-window-split evil-window-vsplit)
+  (consult-buffer))
