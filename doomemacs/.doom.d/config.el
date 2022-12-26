@@ -98,14 +98,33 @@
 ;;       "f" #'python-pytest-file
 ;;       "r" #'python-pytest-repeat)
 
+(map! :leader
+      (:prefix ("m" . "org mode")
+               :desc "org-mark-ring-goto"
+               "e" #'org-mark-ring-goto))
+
 ;; yasnippet auto-expand
 ;; (defun my-yas-try-expanding ()
 ;;   (when yas-minor-mode (yas-expand)))
 ;; (add-hook 'post-command-hook #'my-yas-try-expanding)
 
-;; prompt buffer (((after!  )
+;; buffer prompt after split
 (setq evil-vsplit-window-right t
       evil-split-window-below t)
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
   (consult-buffer))
+
+;; yasnippet minor mode in org
+(defun my-org-latex-yas ()
+  "Activate org and LaTeX yas expansion in org-mode buffers."
+  (yas-minor-mode)
+  (yas-activate-extra-mode 'latex-mode))
+
+(add-hook 'org-mode-hook #'my-org-latex-yas)
+(add-hook 'org-mode-hook #'laas-mode)
+
+
+;; org-preview-latex transparent background
+(with-eval-after-load 'org
+  (plist-put org-format-latex-options :background "Transparent"))

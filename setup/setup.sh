@@ -26,6 +26,8 @@ brew install git ripgrep
 # Brew Casks
 echo "Installing Brew Casks..."
 brew install --cask basictex
+# dvipng for org-preview-latex
+sudo tlmgr update --self && tlmgr install dvipng
 brew install --cask miniconda
 brew install --cask google-chrome
 brew install --cask alfred
