@@ -8,7 +8,12 @@
 
 ;; To install SOME-PACKAGE from MELPA, ELPA or emacsmirror:
 ;(package! some-package)
+(package! company-statistics)
+(package! jupyter)
 (package! org-super-agenda)
+(package! conda)
+(package! straight)
+
 
 ;; To install a package directly from a remote git repo, you must specify a
 ;; `:recipe'. You'll find documentation on what `:recipe' accepts here:
@@ -17,6 +22,9 @@
 ;  :recipe (:host github :repo "username/repo"))
 (package! laas
   :recipe (:host github :repo "tecosaur/LaTeX-auto-activating-snippets"))
+(package! calctex :recipe (:host github :repo "johnbcoughlin/calctex"
+                           :files ("*.el" "calctex/*.el" "calctex-contrib/*.el" "org-calctex/*.el" "vendor"))
+  :pin "67a2e76847a9ea9eff1f8e4eb37607f84b380ebb")
 
 ;; If the package you are trying to install does not contain a PACKAGENAME.el
 ;; file, or is located in a subdirectory of the repo, you'll need to specify

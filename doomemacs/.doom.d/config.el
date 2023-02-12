@@ -6,7 +6,7 @@
 
 ;; Some functionality uses this to identify you, e.g. GPG configuration, email
 ;; clients, file templates and snippets. It is optional.
-(setq user-full-name "hhkgg"
+(setq user-full-name "Howard Kang"
       user-mail-address "kanghoward00@gmail.com")
 
 ;; Doom exposes five (optional) variables for controlling fonts in Doom:
@@ -32,7 +32,7 @@
 ;; There are two ways to load a theme. Both assume the theme is installed and
 ;; available. You can either set `doom-theme' or manually load a theme with the
 ;; `load-theme' function. This is the default:
-(setq doom-theme 'doom-one)
+(setq doom-theme 'doom-peacock)
 
 ;; This determines the style of line numbers in effect. If set to `nil', line
 ;; numbers are disabled. For relative line numbers, set this to `relative'.
@@ -89,8 +89,6 @@
 ;; package configs
 (setq org-roam-directory (file-truename "~/org-roam"))
 
-
-
 ;; mappings
 ;; (map! :after python
 ;;       :map python-mode-map
@@ -102,6 +100,14 @@
       (:prefix ("m" . "org mode")
                :desc "org-mark-ring-goto"
                "e" #'org-mark-ring-goto))
+(map! :leader
+        :desc "toggle-line-number"
+        "l" #'display-line-numbers-mode)
+
+;; (map! :leader
+;;       (:prefix ("m" . "org mode")
+;;                :desc "org-toggle-latex-fragment"
+;;                "l" #'org-toggle-latex-fragment))
 
 ;; yasnippet auto-expand
 ;; (defun my-yas-try-expanding ()
@@ -115,16 +121,258 @@
   :after '(evil-window-split evil-window-vsplit)
   (consult-buffer))
 
-;; yasnippet minor mode in org
+;; yasnippet latex-mode in org
 (defun my-org-latex-yas ()
   "Activate org and LaTeX yas expansion in org-mode buffers."
+  (yas-reload-all)
+  (add-hook 'org-mode-hook #'yas-minor-mode)
   (yas-minor-mode)
   (yas-activate-extra-mode 'latex-mode))
 
 (add-hook 'org-mode-hook #'my-org-latex-yas)
 (add-hook 'org-mode-hook #'laas-mode)
-
+;; electric mode
+(add-hook 'org-mode-hook #'electric-pair-mode)
 
 ;; org-preview-latex transparent background
 (with-eval-after-load 'org
   (plist-put org-format-latex-options :background "Transparent"))
+
+;; calctex
+(use-package! calctex
+  :commands calctex-mode
+  :init
+  (add-hook 'calc-mode-hook #'calctex-mode)
+  :config
+  (setq calctex-additional-latex-packages "
+\\usepackage[usenames]{xcolor}
+\\usepackage{soul}
+\\usepackage{adjustbox}
+\\usepackage{amsmath}
+\\usepackage{amssymb}
+\\usepackage{siunitx}
+\\usepackage{cancel}
+\\usepackage{mathtools}
+\\usepackage{mathalpha}
+\\usepackage{xparse}
+\\usepackage{arevmath}"
+        calctex-additional-latex-macros
+        (concat calctex-additional-latex-macros
+                "\n\\let\\evalto\\Rightarrow"))
+  (defadvice! no-messaging-a (orig-fn &rest args)
+    :around #'calctex-default-dispatching-render-process
+    (let ((inhibit-message t) message-log-max)
+      (apply orig-fn args)))
+  ;; Fix hardcoded dvichop path (whyyyyyyy)
+  (let ((vendor-folder (concat (file-truename doom-local-dir)
+                               "straight/"
+                               (format "build-%s" emacs-version)
+                               "/calctex/vendor/")))
+    (setq calctex-dvichop-sty (concat vendor-folder "texd/dvichop")
+          calctex-dvichop-bin (concat vendor-folder "texd/dvichop")))
+  (unless (file-exists-p calctex-dvichop-bin)
+    (message "CalcTeX: Building dvichop binary")
+    (let ((default-directory (file-name-directory calctex-dvichop-bin)))
+      (call-process "make" nil nil nil))))
+
+
+(map! :map calc-mode-map
+      :after calc
+      :localleader
+      :desc "Embedded calc (toggle)" "e" #'calc-embedded)
+(map! :map org-mode-map
+      :after org
+      :localleader
+      :desc "Embedded calc (toggle)" "E" #'calc-embedded)
+(map! :map latex-mode-map
+      :after latex
+      :localleader
+      :desc "Embedded calc (toggle)" "e" #'calc-embedded)
+
+
+(defvar calc-embedded-trail-window nil)
+(defvar calc-embedded-calculator-window nil)
+
+(defadvice! calc-embedded-with-side-pannel (&rest _)
+  :after #'calc-do-embedded
+  (when calc-embedded-trail-window
+    (ignore-errors
+      (delete-window calc-embedded-trail-window))
+    (setq calc-embedded-trail-window nil))
+  (when calc-embedded-calculator-window
+    (ignore-errors
+      (delete-window calc-embedded-calculator-window))
+    (setq calc-embedded-calculator-window nil))
+  (when (and calc-embedded-info
+             (> (* (window-width) (window-height)) 1200))
+    (let ((main-window (selected-window))
+          (vertical-p (> (window-width) 80)))
+      (select-window
+       (setq calc-embedded-trail-window
+             (if vertical-p
+                 (split-window-horizontally (- (max 30 (/ (window-width) 3))))
+               (split-window-vertically (- (max 8 (/ (window-height) 4)))))))
+      (switch-to-buffer "*Calc Trail*")
+      (select-window
+       (setq calc-embedded-calculator-window
+             (if vertical-p
+                 (split-window-vertically -6)
+               (split-window-horizontally (- (/ (window-width) 2))))))
+      (switch-to-buffer "*Calculator*")
+      (select-window main-window))))
+
+
+(add-hook 'after-init-hook 'company-statistics-mode)
+
+
+;; yasnippet auto expand
+;; (defun my-yas-try-expanding-auto-snippets ()
+;;   (when yas-minor-mode
+;;     (let ((yas-buffer-local-condition ''(require-snippet-condition . auto)))
+;;       (yas-expand))))
+;; (add-hook 'post-command-hook #'my-yas-try-expanding-auto-snippets)
+
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (python . t)
+   (jupyter . t)))
+
+
+(use-package! laas
+  :hook (LaTeX-mode . laas-mode)
+  :config ; do whatever here
+  (aas-set-snippets 'laas-mode
+                    "mk" (lambda () (interactive)
+                             (yas-expand-snippet "$$1$ $0"))
+                    ;; set condition!
+                    :cond #'texmathp ; expand only while in math
+                    "supp" "\\suppn"
+                    "lrp" (lambda () (interactive)
+                             (yas-expand-snippet "\\left( $1 \\right\)$0"))
+                    "lrb" (lambda () (interactive)
+                             (yas-expand-snippet "\\left[ $1 \\right]$0"))
+                    "td" (lambda () (interactive)
+                             (yas-expand-snippet "^{ $1}"))
+                    "abs" (lambda () (interactive)
+                             (yas-expand-snippet "\left|$1\\right|$0"))
+                    "sq" (lambda () (interactive)
+                             (yas-expand-snippet "\\sqrt{ $1}$0"))
+                    "matrix" (lambda () (interactive)
+                             (yas-expand-snippet "
+                                                \begin{bmatrix}
+                                                $1
+                                                \end{bmatrix}
+                                                "))
+                    ";L" (lambda () (interactive)
+                             (yas-expand-snippet "\\wedge "))
+                    "alin" (lambda () (interactive)
+                             (yas-expand-snippet "\\begin{align}$1\\end{align} $0"))
+                    "dm" (lambda () (interactive)
+                             (yas-expand-snippet "\\[ $1]\ $0"))
+                    "bmat" (lambda () (interactive)
+                             (yas-expand-snippet "\begin{bmatrix} $1\end{bmatrix} $0"))
+                    ;; "rm" (lambda () (interactive)
+                    ;;          (yas-expand-snippet "$ $1 $ $ $0"))
+
+                    ))
+
+;; plain latex class
+(with-eval-after-load 'ox-latex
+(add-to-list 'org-latex-classes
+             '("org-plain-latex"
+               "\\documentclass{article}
+           [NO-DEFAULT-PACKAGES]
+           [PACKAGES]
+           [EXTRA]"
+               ("\\section{%s}" . "\\section*{%s}")
+               ("\\subsection{%s}" . "\\subsection*{%s}")
+               ("\\subsubsection{%s}" . "\\subsubsection*{%s}")
+               ("\\paragraph{%s}" . "\\paragraph*{%s}")
+               ("\\subparagraph{%s}" . "\\subparagraph*{%s}"))))
+
+(setq org-latex-src-block-backend 't)
+
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (python . t)
+   (jupyter . t)))
+
+;; org mode
+(setq org-agenda-files
+      '("~/Documents/test_gtd/inbox.org"
+        "~/Documents/test_gtd/projects.org"
+        "~/Documents/test_gtd/repeaters.org" ))
+
+(setq org-return-follows-link t
+      org-agenda-tags-column 75
+      org-deadline-warning-days 30
+      org-use-speed-commands t)
+
+(setq org-capture-templates '(("t" "Todo [inbox]" entry
+                               (file+headline "~/documents/test_gtd/inbox.org" "Tasks")
+                               "* TODO %i%?")
+                              ("T" "Tickler" entry
+                               (file+headline "~/documents/test_gtd/tickler.org" "Tickler")
+                               "* %i%? \n %U")))
+
+(use-package! org-super-agenda
+  :after org-agenda
+  :init
+  (setq org-super-agenda-groups
+        '((:name "Day's Tasks"
+          :time-grid t
+          :transformer (--> it
+                       (upcase it)
+                       (propertize it 'face '(:foreground "RosyBrown1"))))
+          (:name "Priority"
+          :face (:background "black" :underline t)
+          :not (:priority "C")
+          :order 1)
+          (:name "Tertiary"
+                 :priority "C"
+                 :order 100)
+         (:auto-group t))
+        )
+
+  :config
+  (org-super-agenda-mode))
+
+(org-babel-do-load-languages
+ 'org-babel-load-languages
+ '((emacs-lisp . t)
+   (julia . t)
+   (python . t)
+   (jupyter . t)))
+
+(use-package! mathpix.el
+  :commands (mathpix-screenshot)
+  :init
+  (map! "C-x m" #'mathpix-screenshot)
+  :config
+  (setq mathpix-screenshot-method "xfce4-screenshooter -r -o cat > %s"
+        mathpix-app-id (with-temp-buffer (insert-file-contents "./secrets/mathpix-app-id") (buffer-string))
+        mathpix-app-key (with-temp-buffer (insert-file-contents "./secrets/mathpix-app-key") (buffer-string))))
+
+
+(use-package! conda
+  :config
+  (setq conda-anaconda-home (expand-file-name "/opt/homebrew/Caskroom/miniconda/base/"))
+  (setq conda-env-home-directory (expand-file-name "/opt/homebrew/Caskroom/miniconda/base/"))
+  (setq conda-env-subdirectory "envs"))
+
+(unless (getenv "CONDA_DEFAULT_ENV")
+  (conda-env-activate "algos"))
+
+(use-package! jupyter
+  :demand t
+  :after (:all org python))
+
+(defun my/jupyter-refresh-kernelspecs ()
+  "Refresh Jupyter kernelspecs"
+  (interactive)
+  (jupyter-available-kernelspecs t))
+
