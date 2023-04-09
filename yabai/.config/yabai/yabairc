@@ -29,7 +29,6 @@ yabai -m rule --add app="^Calendar$" manage=off
 yabai -m rule --add app="^Mail$" manage=off
 yabai -m rule --add app="^System Settings$" manage=off
 yabai -m rule --add app="^Activity Monitor$" manage=off
-yabai -m rule --add app="^Logic 2010$" manage=off
 yabai -m rule --add app="^Discord" manage=off
 yabai -m rule --add app="^Finder" manage=off
 
