@@ -8,6 +8,7 @@ brew analytics off
 # Brew Taps
 brew tap homebrew/cask-fonts
 brew install --cask font-hack-nerd-font
+brew install --cask emacs
 
 # Brew Formulae
 brew install stow
@@ -36,11 +37,6 @@ brew tap railwaycat/emacsmacport
 brew install emacs-mac --with-modules
 ln -s /opt/homebrew/Cellar/emacs-mac/emacs-28.2-mac-9.1/Emacs.app /Applications/Emacs.app
 
-# Doom Emacs
-git clone --depth 1 https://github.com/doomemacs/doomemacs ~/.emacs.d
-~/.emacs.d/bin/doom install
-doom sync
-
 # Mac App Store Apps
 echo "Installing Mac App Store Apps..."
 mas install 823766827 #OneDrive
@@ -66,6 +62,7 @@ defaults write com.apple.finder "FXEnableExtensionChangeWarning" -bool "false" &
 defaults write com.apple.universalaccess "showWindowTitlebarIcons" -bool "true"
 defaults write com.apple.menuextra.clock "DateFormat" -string "\"EEE d MMM HH:mm:ss\""
 defaults write NSGlobalDomain "ApplePressAndHoldEnabled" -bool "false"
+defaults write com.apple.finder "ShowPathbar" -bool "true" && killall Finder
 
 # zsh plugins
 sh -c "$(curl -fsSL https://raw.githubusercontent.com/ohmyzsh/ohmyzsh/master/tools/install.sh)"

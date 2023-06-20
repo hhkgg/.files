@@ -49,6 +49,8 @@ cmd + alt - n : yabai -m space --create && \
                  index="$(yabai -m query --spaces --display | jq 'map(select(."native-fullscreen" == 0))[-1].index')" && \
                  yabai -m space --focus "${index}"
 
+# destroy desktop
+cmd + alt - w : yabai -m space --destroy
 
 cmd + alt - 1 : yabai -m space --focus 1
 cmd + alt - 2 : yabai -m space --focus 2
@@ -56,6 +58,12 @@ cmd + alt - 3 : yabai -m space --focus 3
 cmd + alt - 4 : yabai -m space --focus 4
 cmd + alt - 5 : yabai -m space --focus 5
 cmd + alt - 6 : yabai -m space --focus 6
+
+# show next space per display
+ctrl + alt + cmd + lshift - 1 : ~/.files/yabai/.config/yabai/customscripts/switchAndFocusSIP.sh 1
+ctrl + alt + cmd + lshift - 2 : ~/.files/yabai/.config/yabai/customscripts/switchAndFocusSIP.sh 2
+ctrl + alt + cmd + lshift - 3 : ~/.files/yabai/.config/yabai/customscripts/switchAndFocusSIP.sh3 3
+
 
 #Move active window to next space on current display
 alt + shift - 1 : yabai -m query --spaces --space | jq -re ".index" | xargs -I {} bash -c "if [[ '{}' = '1' ]]; then yabai -m window --space 2; elif [[ '{}' = '2' ]]; then yabai -m window --space 1; fi"
@@ -73,5 +81,3 @@ shift + cmd - 4 : yabai -m window --space  4; yabai -m space --focus 4
 shift + cmd - 5 : yabai -m window --space  5; yabai -m space --focus 5
 shift + cmd - 6 : yabai -m window --space  6; yabai -m space --focus 6
 
-# destroy desktop
-cmd + alt - w : yabai -m space --destroy

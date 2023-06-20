@@ -10,7 +10,7 @@
 		<array>
 			<dict>
 				<key>destinationuid</key>
-				<string>CC9FAD39-D3D8-4B25-A2E9-3A156AE46447</string>
+				<string>5E711BF9-6E17-4C3C-9EE3-3464627D979A</string>
 				<key>modifiers</key>
 				<integer>0</integer>
 				<key>modifiersubtext</key>
@@ -30,6 +30,25 @@
 	<string>emacseverywhere</string>
 	<key>objects</key>
 	<array>
+		<dict>
+			<key>config</key>
+			<dict>
+				<key>applescript</key>
+				<string>on alfred_script(q)
+tell application "Terminal"
+    do script "emacsclient --eval '(emacs-everywhere)'" in front window    
+end tell
+end alfred_script</string>
+				<key>cachescript</key>
+				<false/>
+			</dict>
+			<key>type</key>
+			<string>alfred.workflow.action.applescript</string>
+			<key>uid</key>
+			<string>5E711BF9-6E17-4C3C-9EE3-3464627D979A</string>
+			<key>version</key>
+			<integer>1</integer>
+		</dict>
 		<dict>
 			<key>config</key>
 			<dict>
@@ -61,39 +80,24 @@
 			<key>version</key>
 			<integer>2</integer>
 		</dict>
-		<dict>
-			<key>config</key>
-			<dict>
-				<key>escaping</key>
-				<integer>0</integer>
-				<key>script</key>
-				<string>emacsclient --eval "(emacs-everywhere)"</string>
-			</dict>
-			<key>type</key>
-			<string>alfred.workflow.action.terminalcommand</string>
-			<key>uid</key>
-			<string>CC9FAD39-D3D8-4B25-A2E9-3A156AE46447</string>
-			<key>version</key>
-			<integer>1</integer>
-		</dict>
 	</array>
 	<key>readme</key>
 	<string></string>
 	<key>uidata</key>
 	<dict>
+		<key>5E711BF9-6E17-4C3C-9EE3-3464627D979A</key>
+		<dict>
+			<key>xpos</key>
+			<real>445</real>
+			<key>ypos</key>
+			<real>275</real>
+		</dict>
 		<key>C60DF552-054A-4A28-BBCA-E61FC7BDCEC2</key>
 		<dict>
 			<key>xpos</key>
 			<real>130</real>
 			<key>ypos</key>
 			<real>280</real>
-		</dict>
-		<key>CC9FAD39-D3D8-4B25-A2E9-3A156AE46447</key>
-		<dict>
-			<key>xpos</key>
-			<real>370</real>
-			<key>ypos</key>
-			<real>295</real>
 		</dict>
 	</dict>
 	<key>userconfigurationconfig</key>
