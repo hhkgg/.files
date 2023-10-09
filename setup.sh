@@ -24,6 +24,7 @@ brew install mas
 brew install koekeishiya/formulae/yabai
 brew install koekeishiya/formulae/skhd
 brew install cmake
+brew install aspell
 
 # for prewview-latex
 brew install ghostscript
