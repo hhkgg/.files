@@ -5,7 +5,8 @@
       doom-font (font-spec :family "DejaVu Sans Mono" :size 14)
       doom-variable-pitch-font (font-spec :family "Roboto" :size 7)
       doom-serif-font (font-spec :family "Libre Baskerville")
-      doom-theme 'doom-city-lights
+      ;; doom-theme 'doom-city-lights
+      doom-theme 'modus-operandi-deuteranopia
       display-line-numbers-type nil
       load-prefer-newer t
       +zen-text-scale 1
@@ -18,9 +19,11 @@
       org-directory "~/.org/"
       org-ellipsis " ▼ "
       org-adapt-indentation nil
-      org-habit-show-habits-only-for-today t)
+      org-habit-show-habits-only-for-today t
+      set-mark-command-repeat-pop t
+      org-src-fontify-natively t)
 
-;; (setq python-shell-virtualenv-root "/opt/homebrew/Caskroom/miniconda/base/bin/python")
+(global-set-key (kbd "M-o") 'ace-window)
 
 (use-package! conda
   :config
@@ -33,12 +36,6 @@
   (unless (getenv "CONDA_DEFAULT_ENV")
     (conda-env-activate "base")))
 
-;; (shell-command "conda init bash")
-;; (shell-command "conda activate")
-
-;; (setq python-python-command "/opt/homebrew/Caskroom/miniconda/base/bin/python")
-;; (setq python-shell-interpreter "/opt/homebrew/Caskroom/miniconda/base/bin/python")
-
 ;; buffer prompt after split
 (defadvice! prompt-for-buffer (&rest _)
   :after '(evil-window-split evil-window-vsplit)
@@ -47,23 +44,87 @@
 ;; splash screen
 (setq fancy-splash-image (concat doom-user-dir "doom-vapourwave.png"))
 
-;; global keybinds
-;; (map! :prefix "SPC"
-;;       "S-o" #'ace-window)
-
-
 ;; latex add texbin to emacs path variable
 (setenv "PATH" (concat (getenv "PATH") ":/usr/local/texlive/2023/bin/universal-darwin"))
 (setq exec-path (append exec-path '("/usr/local/texlive/2023/bin/universal-darwin")))
 
-(setq set-mark-command-repeat-pop t)
-
-
+;; org mode
 (org-babel-do-load-languages
  'org-babel-load-languages
  '((emacs-lisp . t)
    (python . t)
    (jupyter . t)))
+
+
+(defun my/organize-hooks ()
+  (when (org-gtd-organize-type-member-p '(project-heading))
+    (org-set-tags-command)))
+
+(use-package! org-gtd
+  :after org
+  :init
+  (setq stag-org-gtd-directory "~/.org/gtd")
+  (setq org-gtd-update-ack "3.0.0")
+  :custom
+  (org-gtd-directory stag-org-gtd-directory)
+  (org-agenda-property-position 'next-line)
+  (org-edna-use-inheritance t)
+  :config
+  (org-edna-mode)
+  (require 'org-gtd)
+  (map! :leader
+        :prefix ("d" . "org-gtd")
+        "X" #'org-gtd-capture
+        "c" #'org-gtd-clarify-item
+        "o" #'org-gtd-organize
+        "p" #'org-gtd-process-inbox
+        "e" #'my/org-gtd-engage
+        ;; "d" #'org-gtd-engage
+        ;; "C-c d n" #'org-gtd-show-all-next
+        ;; "C-c d s" #'org-gtd-show-stuck-projects
+        )
+  (setq org-gtd-organize-hooks '(my/organize-hooks))
+  )
+
+(after! org-roam
+  :init
+  (map! :leader
+        :prefix ("n" . "notes")
+        "r c" #'completion-at-point)
+  :config
+  (setq org-roam-directory (file-truename "~/.org/org-roam"))
+  (setq org-roam-complete-everywhere t)
+  :custom
+  (setq org-roam-capture-templates
+        '(("d" "default" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          ("l" "programming language" plain
+           "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :unnarrowed t)
+          )
+        )
+
+  (org-roam-db-autosync-enable))
+
+
+(use-package! websocket
+  :after org-roam)
+
+(use-package! org-roam-ui
+  :after org-roam ;; or :after org
+  ;;         normally we'd recommend hooking orui after org-roam, but since org-roam does not have
+  ;;         a hookable mode anymore, you're advised to pick something yourself
+  ;;         if you don't care about startup time, use
+  ;;  :hook (after-init . org-roam-ui-mode)
+  :config
+  (setq org-roam-ui-sync-theme t
+        org-roam-ui-follow t
+        org-roam-ui-update-on-save t
+        org-roam-ui-open-on-start t))
+
 
 (setq jupyter-repl-echo-eval-p t)
 (global-set-key (kbd "C-c C-x") 'jupyter-eval-region)
@@ -77,17 +138,18 @@
 ;; latex
 (setq cdlatex-env-alist
       '(("axiom" "\\begin{axiom}\nAUTOLABEL\n?\n\\end{axiom}\n" nil)
-	("theorem" "\\begin{theorem}\nAUTOLABEL\n?\n\\end{theorem}\n" nil)
-	("proof" "\\begin{proof}\nAUTOLABEL\n?\n\\end{proof}\n" nil)
+	("theorem" "\\begin{thm}\nAUTOLABEL\n?\n\\end{thm}\n" nil)
+	("proof" "\\begin{prooof}\nAUTOLABEL\n?\n\\end{prooof}\n" nil)
 	("alphenum" "\\begin{enumerate}[\label=\\alph*)]\nAUTOLABEL\n?\n\\end{enumerate}\n" nil)
         ))
-
-(setq org-src-fontify-natively t)
 
 (use-package! laas
   :hook (LaTeX-mode . laas-mode)
   :config ; do whatever here
   (aas-set-snippets 'laas-mode
+    "ftn" (lambda () (interactive)
+	    (yas-expand-snippet "\\footnote{$1} $0"))
+
     ;; set condition!
     :cond #'texmathp ; expand only while in math
     "supp" "\\supp"
@@ -101,10 +163,11 @@
     "Span" (lambda () (interactive)
 	     (yas-expand-snippet "\\Span($1)$0"))
     "abs" (lambda () (interactive)
-            (yas-expand-snippet "\left|$1\\right|$0"))
-
+            (yas-expand-snippet "\\abs{$1}$0"))
     "CC" (lambda () (interactive)
 	   (yas-expand-snippet "\\subseteq $0"))
+    "SM" (lambda () (interactive)
+	   (yas-expand-snippet "\\setminus $0"))
     "NN" (lambda () (interactive)
 	   (yas-expand-snippet "\\cap $0"))
     "UU" (lambda () (interactive)
@@ -116,6 +179,19 @@
 	   (yas-expand-snippet "\\mathbb{R} $0"))
     "ZZ" (lambda () (interactive)
 	   (yas-expand-snippet "\\mathbb{Z} $0"))
+    ";a" (lambda () (interactive)
+           (yas-expand-snippet "\\alpha $0"))
+    ";b" (lambda () (interactive)
+           (yas-expand-snippet "\\beta $0"))
+
+    ";p" (lambda () (interactive)
+           (yas-expand-snippet "^{\\prime} $0"))
+
+    "NM" (lambda () (interactive)
+           (yas-expand-snippet "\\mathbb{N} $0"))
+
+    "stmn" (lambda () (interactive)
+	     (yas-expand-snippet "\\setminus $0"))
 
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
@@ -126,12 +202,15 @@
   :config
   (setq cdlatex-use-dollar-to-ensure-math t)
   (map! :map cdlatex-mode-map
+        ;; enable $ pairs
         "$" #'cdlatex-dollar
         "TAB" #'cdlatex-tab))
 
 ;; prevent switch focus on tex-command-run-all
 (after! tex
   :config
+  (setq TeX-auto-save t)
+  (setq TeX-parse-self t)
   (dolist (viewer (reverse +latex-viewers))
     (pcase viewer
       (`skim
@@ -147,65 +226,22 @@
 
 ;; org/tex mode hooks
 (add-hook! 'org-mode-hook 'laas-mode)
+(add-hook! 'org-mode-hook 'org-gtd-mode)
 (add-hook! 'org-mode-hook 'cdlatex-mode)
 (add-hook! 'LaTeX-mode-hook 'cdlatex-mode)
 
-(use-package! mathpix.el
-  :commands (mathpix-screenshot)
-  :init
-  (map! "C-x m" #'mathpix-screenshot)
-  :config
-  (setq mathpix-screenshot-method "screencapture -i %s"
-        mathpix-app-id (with-temp-buffer (insert-file-contents "./secrets/mathpix-app-id") (buffer-string))
-        mathpix-app-key (with-temp-buffer (insert-file-contents "./secrets/mathpix-app-key") (buffer-string))))
-
-
-;; (after! org
-;;   (setq org-agenda-files '("~/.org/gtd/inbox.org"))
-;;   (setq org-agenda-span 20)
-;;   ;; (setq org-agenda-start-day "+20d"))
-
-;;   (setq howardkang/org-agenda-directory "~/.org/gtd/")
-;;   (setq org-capture-templates
-;;         `(("i" "inbox" entry (file ,(concat howardkang/org-agenda-directory "inbox.org"))
-;;            "* TODO %?")
-;;           ("e" "email" entry (file+headline ,(concat howardkang/org-agenda-directory "emails.org") "Emails")
-;;            "* TODO [#A] Reply: %a :@home:@school:" :immediate-finish t)
-;;           ("l" "link" entry (file ,(concat howardkang/org-agenda-directory "inbox.org"))
-;;            "* TODO %(org-cliplink-capture)" :immediate-finish t)
-;;           ("c" "org-protocol-capture" entry (file ,(concat howardkang/org-agenda-directory "inbox.org"))
-;;            "* TODO [[%:link][%:description]]\n\n %i" :immediate-finish t))))
-
+(fset 'rainbow-delimiters-mode #'ignore)
 
 (defun insert-date ()
   "Insert a timestamp according to locale's date and time format."
   (interactive)
   (insert (format-time-string "%c" (current-time))))
 
-;; (use-package! tree-sitter
-;;   :hook
-;;   (prog-mode . global-tree-sitter-mode))
-
-;; (map! :after org
-;;       :map org-mode-map
-;;       :mode i
-;;       :prefix "C"
-;;       "l" #'flyspell-auto-correct-word)
-
-(use-package! ctrlf
-  :hook
-  (after-init . ctrlf-mode)
-  :config
-  (map! :map cdlatex-mode-map
-        "C-l" #'ctrlf-backward-default))
-
 (use-package! easy-kill
   :bind*
   (([remap kill-ring-save] . easy-kill)))
 
-(setq jupyter-long-timeout 50)
-
-
+;; clean jupyter kernels and helper functions
 (setq my/jupyter-runtime-folder (expand-file-name "/Users/howardkang/Library/Jupyter/runtime"))
 (defun my/get-open-ports ()
   (mapcar
@@ -234,11 +270,10 @@
 
 (use-package! jupyter
   :after (python conda)
-  ;; emacs-jupyter will always juse the Python kernel found on startup
+  ;; emacs-jupyter will always use the Python kernel found on startup
   ;; ⇒ after switching to new environment, code still running in the old one (inconvenient)
   ;; To fix, force refresh of jupyter kernelspecs (source - https://sqrtminusone.xyz/posts/2021-05-01-org-python/)
   :config
-
   (defun my/jupyter-refresh-kernelspecs ()
     "Refresh Jupyter kernelspecs"
     (interactive)
@@ -249,53 +284,3 @@
       :map python-mode-map
       :prefix "j"
       "a" #'jupyter-repl-associate-buffer)
-
-(org-super-agenda-mode 1)
-
-(use-package! org-super-agenda
-  :config
-  (setq org-agenda-files '("~/.org/gtd/inbox.org"))
-  (setq org-super-agenda-groups t)
-  (setq org-super-agenda-mode t)
-  (setq org-super-agenda-groups
-        '(;; Each group has an implicit boolean OR operator between its selectors.
-          (:name "Today"  ; Optionally specify section name
-           :time-grid t  ; Items that appear on the time grid
-           :todo "TODAY")  ; Items that have this TODO keyword
-          (:name "Important"
-           ;; Single arguments given alone
-           :tag "bills"
-           :priority "A")
-          ;; Set order of multiple groups at once
-          (:order-multi (2 (:name "Shopping in town"
-                            ;; Boolean AND group matches items that match all subgroups
-                            :and (:tag "shopping" :tag "@town"))
-                           (:name "Food-related"
-                            ;; Multiple args given in list with implicit OR
-                            :tag ("food" "dinner"))
-                           (:name "Personal"
-                            :habit t
-                            :tag "personal")
-                           (:name "Space-related (non-moon-or-planet-related)"
-                            ;; Regexps match case-insensitively on the entire entry
-                            :and (:regexp ("space" "NASA")
-                                  ;; Boolean NOT also has implicit OR between selectors
-                                  :not (:regexp "moon" :tag "planet")))))
-          ;; Groups supply their own section names when none are given
-          (:todo "WAITING" :order 8)  ; Set order of this section
-          (:todo ("SOMEDAY" "TO-READ" "CHECK" "TO-WATCH" "WATCHING")
-           ;; Show this group at the end of the agenda (since it has the
-           ;; highest number). If you specified this group last, items
-           ;; with these todo keywords that e.g. have priority A would be
-           ;; displayed in that group instead, because items are grouped
-           ;; out in the order the groups are listed.
-           :order 9)
-          (:priority<= "B"
-           ;; Show this section after "Today" and "Important", because
-           ;; their order is unspecified, defaulting to 0. Sections
-           ;; are displayed lowest-number-first.
-           :order 1)
-          ;; After the last group, the agenda will display items that didn't
-          ;; match any of these groups, with the default order position of 99
-          )))
-

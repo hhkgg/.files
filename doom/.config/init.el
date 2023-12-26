@@ -63,9 +63,9 @@
        (go +lsp +treesitter)
        (json +lsp)
        (javascript +lsp)
-       (latex +latexmk +cdlatex +lsp)
+       (latex +latexmk +cdlatex +lsp +fold)
        markdown
-       (org +jupyter)
+       (org +jupyter +roam2)
        (python +lsp +pyright)
        rest
        sh
