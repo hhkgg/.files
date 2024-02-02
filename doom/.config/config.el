@@ -24,6 +24,10 @@
       org-src-fontify-natively t)
 
 (global-set-key (kbd "M-o") 'ace-window)
+(global-set-key (kbd "M-p") 'replace-string)
+
+(map! :leader
+      "X" #'org-gtd-capture)
 
 (use-package! conda
   :config
@@ -56,35 +60,89 @@
    (jupyter . t)))
 
 
+;; (after! org
+;;   (setq org-agenda-files '("~/.org/gtd/org-gtd-tasks.org")))
+;;
+;;
+
+;; (add-hook! '+doom-dashboard-mode-hook 'read-only-mode-hook)
+
 (defun my/organize-hooks ()
   (when (org-gtd-organize-type-member-p '(project-heading))
     (org-set-tags-command)))
 
+
 (use-package! org-gtd
   :after org
   :init
-  (setq stag-org-gtd-directory "~/.org/gtd")
+  ;; (setq stag-org-gtd-directory "~/.org/gtd")
   (setq org-gtd-update-ack "3.0.0")
+
   :custom
-  (org-gtd-directory stag-org-gtd-directory)
+  (org-gtd-directory "~/.org/gtd")
   (org-agenda-property-position 'next-line)
   (org-edna-use-inheritance t)
+  (org-gtd-organize-hooks '(my/organize-hooks))
   :config
   (org-edna-mode)
   (require 'org-gtd)
+  (defun my/org-gtd-engage ()
+    "Display `org-agenda' customized by org-gtd."
+    (interactive)
+    (org-gtd-core-prepare-agenda-buffers)
+    (with-org-gtd-context
+        (let* ((project-format-prefix
+                (format " %%i %%-%d:(org-gtd-agenda--prefix-format) "
+                        org-gtd-engage-prefix-width))
+               (org-agenda-custom-commands
+                `(("g" "scheduled today and all next items"
+                   ((agenda ""
+                            ((org-agenda-span 14)
+                             (org-agenda-start-day nil)
+                             (org-agenda-skip-additional-timestamps-same-entry t)))
+                    (todo org-gtd-next
+                          ((org-agenda-overriding-header "Next items")
+                           (org-agenda-prefix-format
+                            '((todo . ,project-format-prefix)))
+                           (org-agenda-sorting-strategy '(time-up priority-down))
+                           ))
+                    (tags "PRIORITY=\"A\""
+                          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                           (org-agenda-overriding-header "High-priority")
+                           ))
+                    (tags "mat159"
+                          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                           (org-agenda-overriding-header "MAT159")
+                           (org-agenda-sorting-strategy '(priority-down))))
+                    (tags "mat240"
+                          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                           (org-agenda-overriding-header "MAT240")
+                           (org-agenda-sorting-strategy '(priority-down))))
+                    (tags "csc148"
+                          ((org-agenda-skip-function '(org-agenda-skip-entry-if 'todo 'done))
+                           (org-agenda-overriding-header "CSC148")
+                           (org-agenda-sorting-strategy '(priority-down))))
+
+                    (alltodo ""
+                             ((org-agenda-sorting-strategy '(priority-down))))
+                    ))))
+               )
+          (org-agenda nil "g")
+          (goto-char (point-min)))))
+
   (map! :leader
         :prefix ("d" . "org-gtd")
-        "X" #'org-gtd-capture
+        ;; "X" #'org-gtd-capture
         "c" #'org-gtd-clarify-item
         "o" #'org-gtd-organize
         "p" #'org-gtd-process-inbox
         "e" #'my/org-gtd-engage
-        ;; "d" #'org-gtd-engage
+        ;; "e" #'org-gtd-engage
         ;; "C-c d n" #'org-gtd-show-all-next
         ;; "C-c d s" #'org-gtd-show-stuck-projects
         )
-  (setq org-gtd-organize-hooks '(my/organize-hooks))
   )
+
 
 (after! org-roam
   :init
@@ -94,21 +152,26 @@
   :config
   (setq org-roam-directory (file-truename "~/.org/org-roam"))
   (setq org-roam-complete-everywhere t)
+  (org-roam-db-autosync-enable)
   :custom
   (setq org-roam-capture-templates
-        '(("d" "default" plain
+        '(("d" "definition" plain
            "%?"
-           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+           :if-new (file+head "%<%y%m%d%h%m%s>-${slug}.org" "#+title: ${title}\n#+filetags: :mathematics:mat159:definition:")
            :unnarrowed t)
-          ("l" "programming language" plain
-           "* Characteristics\n\n- Family: %?\n- Inspired by: \n\n* Reference:\n\n"
-           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n")
+          ("t" "theorem" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: :mathematics:mat159:theorem:")
            :unnarrowed t)
-          )
-        )
-
-  (org-roam-db-autosync-enable))
-
+          ("p" "proof" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: :mathematics:mat159:proof:")
+           :unnarrowed t)
+          ("p" "proposition" plain
+           "%?"
+           :if-new (file+head "%<%Y%m%d%H%M%S>-${slug}.org" "#+title: ${title}\n#+filetags: :mathematics:mat159:proposition:")
+           :unnarrowed t)
+          )))
 
 (use-package! websocket
   :after org-roam)
@@ -120,6 +183,8 @@
   ;;         if you don't care about startup time, use
   ;;  :hook (after-init . org-roam-ui-mode)
   :config
+  ;; temporary fix org-roam-ui single tag bug
+  (setq org-roam-database-connector 'sqlite)
   (setq org-roam-ui-sync-theme t
         org-roam-ui-follow t
         org-roam-ui-update-on-save t
@@ -137,11 +202,19 @@
 
 ;; latex
 (setq cdlatex-env-alist
-      '(("axiom" "\\begin{axiom}\nAUTOLABEL\n?\n\\end{axiom}\n" nil)
-	("theorem" "\\begin{thm}\nAUTOLABEL\n?\n\\end{thm}\n" nil)
-	("proof" "\\begin{prooof}\nAUTOLABEL\n?\n\\end{prooof}\n" nil)
+      '(("axiom" "\\begin{axiom}\n?\n\\end{axiom}\n" nil)
+	("theorem" "\\begin{thm}\n?\n\\end{thm}\n" nil)
+	("proof" "\\begin{prooof}\n?\n\\end{prooof}\n" nil)
 	("alphenum" "\\begin{enumerate}[\label=\\alph*)]\nAUTOLABEL\n?\n\\end{enumerate}\n" nil)
         ))
+
+(setq cdlatex-command-alist
+      '(("axm" "Insert axiom env"   "" cdlatex-environment ("axiom") t nil)
+        ("thr" "Insert theorem env" "" cdlatex-environment ("theorem") t nil)
+        ))
+
+(add-hook 'latex-mode-hook (lambda ()
+                             (push '(?$ . ("$" . "$")) evil-surround-pairs-alist)))
 
 (use-package! laas
   :hook (LaTeX-mode . laas-mode)
@@ -149,6 +222,15 @@
   (aas-set-snippets 'laas-mode
     "ftn" (lambda () (interactive)
 	    (yas-expand-snippet "\\footnote{$1} $0"))
+
+    "defn" (lambda () (interactive)
+	     (yas-expand-snippet "\\begin{definition}{\\textbf{$1}} \\newline \n$0\n \\end{definition}"))
+
+    "soln" (lambda () (interactive)
+	     (yas-expand-snippet "\\begin{solution} \n$0\n \\end{solution}"))
+
+    "exm" (lambda () (interactive)
+	    (yas-expand-snippet "\\begin{example} \n$0\n \\end{example}"))
 
     ;; set condition!
     :cond #'texmathp ; expand only while in math
@@ -183,6 +265,8 @@
            (yas-expand-snippet "\\alpha $0"))
     ";b" (lambda () (interactive)
            (yas-expand-snippet "\\beta $0"))
+    ";t" (lambda () (interactive)
+           (yas-expand-snippet "\\theta $0"))
 
     ";p" (lambda () (interactive)
            (yas-expand-snippet "^{\\prime} $0"))
@@ -190,8 +274,18 @@
     "NM" (lambda () (interactive)
            (yas-expand-snippet "\\mathbb{N} $0"))
 
+    "spann" (lambda () (interactive)
+              (yas-expand-snippet "\\operatorname{span}($1) $0"))
+
+    ;; "tt" (lambda () (interactive)
+    ;;        (yas-expand-snippet "&\\text{$1} \\newline $0"))
+
+    ;; "inn" (lambda () (interactive)
+    ;;         (yas-expand-snippet "\\int $0"))
+
     "stmn" (lambda () (interactive)
 	     (yas-expand-snippet "\\setminus $0"))
+
 
     ;; add accent snippets
     :cond #'laas-object-on-left-condition
