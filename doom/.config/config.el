@@ -5,8 +5,9 @@
       doom-font (font-spec :family "DejaVu Sans Mono" :size 14)
       doom-variable-pitch-font (font-spec :family "Roboto" :size 7)
       doom-serif-font (font-spec :family "Libre Baskerville")
-      ;; doom-theme 'doom-city-lights
-      doom-theme 'modus-operandi-deuteranopia
+      doom-theme 'zenburn
+      ;; doom-theme 'doom-shades-of-purple
+      ;; doom-theme 'modus-operandi-deuteranopia
       display-line-numbers-type nil
       load-prefer-newer t
       +zen-text-scale 1
@@ -226,11 +227,20 @@
     "defn" (lambda () (interactive)
 	     (yas-expand-snippet "\\begin{definition}{\\textbf{$1}} \\newline \n$0\n \\end{definition}"))
 
+    "thm" (lambda () (interactive)
+	    (yas-expand-snippet "\\begin{theorem}{\\textbf{$1}} \\newline \n$0\n \\end{theorem}"))
+
     "soln" (lambda () (interactive)
 	     (yas-expand-snippet "\\begin{solution} \n$0\n \\end{solution}"))
 
     "exm" (lambda () (interactive)
 	    (yas-expand-snippet "\\begin{example} \n$0\n \\end{example}"))
+
+    "bmat" (lambda () (interactive)
+	     (yas-expand-snippet "\\begin{equation}\n\\begin{bmatrix}\n$1\n\\end{bmatrix}$2\n\\end{equation}$0"))
+
+    "pmat" (lambda () (interactive)
+	     (yas-expand-snippet "\\begin{equation}\n\\begin{pmatrix*}[r]\n$1\n\\end{pmatrix*}$2\n\\end{equation}$0"))
 
     ;; set condition!
     :cond #'texmathp ; expand only while in math
@@ -378,3 +388,5 @@
       :map python-mode-map
       :prefix "j"
       "a" #'jupyter-repl-associate-buffer)
+
+

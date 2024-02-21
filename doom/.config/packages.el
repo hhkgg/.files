@@ -7,7 +7,7 @@
 (package! emacs-everywhere)
 (package! easy-kill)
 (package! org-gtd)
-(package! modus-themes)
+(package! zenburn-theme)
 
 (when (package! org-roam-ui)
   (package! websocket)
